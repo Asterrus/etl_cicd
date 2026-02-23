@@ -134,7 +134,7 @@ class TestLoadFact:
             email="customer1@example.com",
             phone="1234567890",
         )
-        sale_id = await insert_sale(
+        await insert_sale(
             session,
             customer_id=customer_id,
             product_id=product_id,
