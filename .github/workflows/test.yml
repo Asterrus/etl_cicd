@@ -8,5 +8,9 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Set up Python
         run: uv python install
+      - name: Run database
+        run: make test-up
       - name: Run tests
-        run: uv run pytest tests
+        run: make test
+      - name: Stop database
+        run: make test-down
