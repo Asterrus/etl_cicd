@@ -4,11 +4,11 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sql_scripts.olap.customer_dim import load_customer_dim
-from sql_scripts.olap.etl import run_etl
-from sql_scripts.olap.product_dim import load_product_dim
-from sql_scripts.olap.sales_fact import load_sales_fact
-from sql_scripts.oltp import (
+from src.sql_scripts.olap.customer_dim import load_customer_dim
+from src.sql_scripts.olap.etl import run_etl
+from src.sql_scripts.olap.product_dim import load_product_dim
+from src.sql_scripts.olap.sales_fact import load_sales_fact
+from src.sql_scripts.oltp import (
     insert_customer,
     insert_product,
     insert_sale,

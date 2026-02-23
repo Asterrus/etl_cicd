@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 from sqlalchemy.orm import Session as SyncSession
 from sqlalchemy.orm.session import SessionTransaction
 
-from db.engine import create_engine
+from src.db.engine import create_engine
 
 load_dotenv()
 

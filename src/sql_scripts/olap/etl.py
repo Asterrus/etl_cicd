@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sql_scripts.olap.customer_dim import load_customer_dim
-from sql_scripts.olap.product_dim import load_product_dim
-from sql_scripts.olap.sales_fact import load_sales_fact
+from .customer_dim import load_customer_dim
+from .product_dim import load_product_dim
+from .sales_fact import load_sales_fact
 
 
 async def run_etl(session: AsyncSession):

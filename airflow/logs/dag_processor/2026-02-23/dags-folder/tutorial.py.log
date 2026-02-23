@@ -1,0 +1,39 @@
+{"timestamp":"2026-02-23T20:55:26.572955Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:55:26.573190Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:55:26.577946Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:55:56.789707Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:55:56.789919Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:55:56.793339Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:56:26.988890Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:56:26.989112Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:56:26.992579Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:56:57.187128Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:56:57.187355Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:56:57.191185Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:57:27.387492Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:57:27.387704Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:57:27.391377Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:57:57.586712Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:57:57.586956Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:57:57.591246Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:58:52.680741Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:58:52.680957Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:58:52.687057Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:59:22.979729Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:59:22.980020Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:59:22.983540Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T20:59:53.183979Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T20:59:53.184199Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T20:59:53.187767Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T21:00:23.382006Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T21:00:23.382226Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T21:00:23.385636Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T21:00:53.579322Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T21:00:53.579538Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T21:00:53.583094Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T21:01:23.780157Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T21:01:23.780385Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T21:01:23.783808Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}
+{"timestamp":"2026-02-23T21:01:53.967934Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-23T21:01:53.968149Z","level":"debug","event":"Importing /opt/airflow/dags/tutorial.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":391}
+{"timestamp":"2026-02-23T21:01:53.971697Z","level":"debug","event":"Loaded DAG <DAG: tutorial>","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":568}

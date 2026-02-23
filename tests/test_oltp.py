@@ -4,7 +4,7 @@ from uuid import UUID
 import pytest
 from sqlalchemy import text
 
-from sql_scripts.oltp import (
+from src.sql_scripts.oltp import (
     insert_customer,
     insert_product,
     insert_sale,

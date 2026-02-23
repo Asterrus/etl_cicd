@@ -1,17 +1,21 @@
+name: etl-cicd-prod
+
 services:
   db_prod:
     image: postgres:18-alpine
-    container_name: etl_cicd_db_prod
+    container_name: etl-cicd-db-prod
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_PROD_DB}
       POSTGRES_USER: ${POSTGRES_PROD_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_PROD_HOST}
+      POSTGRES_PORT: ${POSTGRES_PROD_PORT}
     volumes:
-      - postgres_db_prod_volume:/var/lib/postgresql/data
+      - postgres-db-prod-volume:/var/lib/postgresql/data
       - ./entrypoints/db/:/docker-entrypoint-initdb.d
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PROD_PORT}:5432"
     healthcheck:
       test:
         [
@@ -23,4 +27,4 @@ services:
       retries: 5
 
 volumes:
-  postgres_db_prod_volume:
+  postgres-db-prod-volume:

@@ -1,4 +1,4 @@
-.PHONY: up down test-up test-down
+.PHONY: up down test-up test-down airflow-up airflow-down check-dags
 
 up:
 	docker compose up -d --build
@@ -14,3 +14,14 @@ test-down:
 
 test:
 	uv run pytest tests
+
+airflow-up:
+	docker compose -f docker-compose.airflow.yaml up -d --build
+
+airflow-down:
+	docker compose -f docker-compose.airflow.yaml down --volumes --remove-orphans
+
+check-dags:
+	docker compose -f docker-compose.airflow.yaml exec airflow-webserver airflow dags list
+	docker compose -f docker-compose.airflow.yaml exec airflow-webserver airflow dags list-import-errors
+	docker compose -f docker-compose.airflow.yaml exec airflow-webserver python -c "import etl_dag"
