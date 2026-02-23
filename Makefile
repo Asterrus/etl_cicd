@@ -1,4 +1,4 @@
-.PHONY: up down test-up test-down airflow-up airflow-down check-dags
+.PHONY: up down test-up test-down airflow-up airflow-down check-dags run-simple run-async
 
 up:
 	docker compose up -d --build
@@ -25,3 +25,9 @@ check-dags:
 	docker compose -f docker-compose.airflow.yaml exec airflow-webserver airflow dags list
 	docker compose -f docker-compose.airflow.yaml exec airflow-webserver airflow dags list-import-errors
 	docker compose -f docker-compose.airflow.yaml exec airflow-webserver python -c "import etl_dag"
+
+run-simple:
+	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test test_python_simple simple_task 2025-01-01
+
+run-async:
+	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test test_python_async async_task 2025-01-01
