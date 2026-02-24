@@ -14,6 +14,8 @@ load_dotenv()
 
 
 def get_database_url() -> str:
+    if url := os.getenv("TEST_DATABASE_URL"):
+        return url
     postgres_user = os.getenv("POSTGRES_TEST_USER", "etl_test")
     postgres_password = os.getenv("POSTGRES_TEST_PASSWORD", "etl_test_password")
     postgres_db = os.getenv("POSTGRES_TEST_DB", "etl_test")

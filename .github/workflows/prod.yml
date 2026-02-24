@@ -1,0 +1,34 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-prod:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_PROD_DB: etl_prod
+      POSTGRES_PROD_USER: etl_prod
+      POSTGRES_PROD_PASSWORD: etl_prod_password
+      POSTGRES_PROD_HOST: localhost
+      POSTGRES_PROD_PORT: "5434"
+      TEST_DATABASE_URL: postgresql+psycopg://etl_prod:etl_prod_password@localhost:5434/etl_prod
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install
+      - name: Run prod database
+        run: make prod-up
+      - name: Wait for postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5434 && break
+            sleep 1
+          done
+      - name: Run tests against prod database
+        run: make test
+      - name: Stop prod database
+        if: always()
+        run: make prod-down

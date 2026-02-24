@@ -1,4 +1,11 @@
-on: [push]
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - main
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -8,7 +15,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Set up Python
         run: uv python install
-      - name: Run database
+      - name: Run test database
         run: make test-up
       - name: Wait for postgres
         run: |
@@ -18,5 +25,6 @@ jobs:
           done
       - name: Run tests
         run: make test
-      - name: Stop database
+      - name: Stop test database
+        if: always()
         run: make test-down

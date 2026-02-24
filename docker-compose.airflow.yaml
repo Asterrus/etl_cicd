@@ -25,8 +25,8 @@ x-airflow-common: &airflow-common
     POSTGRES_PROD_DB: ${POSTGRES_PROD_DB:-etl_prod}
     POSTGRES_PROD_USER: ${POSTGRES_PROD_USER:-etl_prod}
     POSTGRES_PROD_PASSWORD: ${POSTGRES_PROD_PASSWORD:-etl_prod_password}
-    POSTGRES_PROD_HOST: ${POSTGRES_PROD_HOST:-db_prod}
-    POSTGRES_PROD_PORT: ${POSTGRES_PROD_PORT:-5436}
+    POSTGRES_PROD_HOST: db_prod
+    POSTGRES_PROD_PORT: "5432"
 
     PYTHONPATH: /opt/airflow:/opt/airflow/dags:/opt/src
 
@@ -48,6 +48,8 @@ x-airflow-common: &airflow-common
     redis:
       condition: service_started
     db_test:
+      condition: service_healthy
+    db_prod:
       condition: service_healthy
 
 services:
@@ -88,6 +90,29 @@ services:
         [
           "CMD-SHELL",
           "pg_isready -U ${POSTGRES_TEST_USER:-etl_test} -d ${POSTGRES_TEST_DB:-etl_test}",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  db_prod:
+    image: postgres:18-alpine
+    container_name: etl-cicd-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_PROD_DB}
+      POSTGRES_USER: ${POSTGRES_PROD_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_PROD_HOST}
+      POSTGRES_PORT: ${POSTGRES_PROD_PORT}
+    volumes:
+      - postgres-db-prod-volume:/var/lib/postgresql/data
+      - ./entrypoints/db/:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_PROD_USER} -d ${POSTGRES_PROD_DB}",
         ]
       interval: 3s
       timeout: 3s
@@ -164,3 +189,4 @@ services:
 volumes:
   airflow-postgres-db-volume:
   postgres-db-test-volume:
+  postgres-db-prod-volume:

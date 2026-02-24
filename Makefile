@@ -1,9 +1,15 @@
-.PHONY: up down test-up test-down airflow-up airflow-down check-dags run-simple run-async run-etl
+.PHONY: up down prod-up prod-down test-up test-down airflow-up airflow-down check-dags run-simple run-async run-etl
 
 up:
 	docker compose up -d --build
 
 down:
+	docker compose down --volumes --remove-orphans
+
+prod-up:
+	docker compose up -d --build
+
+prod-down:
 	docker compose down --volumes --remove-orphans
 
 test-up:

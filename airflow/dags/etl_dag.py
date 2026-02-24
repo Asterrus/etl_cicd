@@ -31,7 +31,7 @@ def _build_prod_db_url() -> str:
     postgres_db = os.getenv("POSTGRES_PROD_DB", "etl_prod")
     postgres_host = os.getenv("POSTGRES_PROD_HOST", "etl-cicd-db-prod")
     postgres_port = os.getenv("POSTGRES_PROD_PORT", "5434")
-    return f"postgresql+psycopg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
+    return f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
 
 
 async def _run_etl_for_url(db_url: str) -> None:
