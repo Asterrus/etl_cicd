@@ -1,0 +1,192 @@
+name: etl-cicd-airflow
+
+x-airflow-common: &airflow-common
+  build:
+    context: ./airflow/
+    dockerfile: Dockerfile
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres-db/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres-db/airflow
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__AUTH_MANAGER: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
+    AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+
+    POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-etl_test}
+    POSTGRES_TEST_USER: ${POSTGRES_TEST_USER:-etl_test}
+    POSTGRES_TEST_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
+    POSTGRES_TEST_HOST: ${POSTGRES_TEST_HOST:-etl-cicd-db-test}
+    POSTGRES_TEST_PORT: ${POSTGRES_TEST_PORT:-5432}
+
+    POSTGRES_PROD_DB: ${POSTGRES_PROD_DB:-etl_prod}
+    POSTGRES_PROD_USER: ${POSTGRES_PROD_USER:-etl_prod}
+    POSTGRES_PROD_PASSWORD: ${POSTGRES_PROD_PASSWORD:-etl_prod_password}
+    POSTGRES_PROD_HOST: db_prod
+    POSTGRES_PROD_PORT: "5432"
+
+    PYTHONPATH: /opt/airflow:/opt/airflow/dags:/opt/src
+
+    AIRFLOW__LOGGING__LOGGING_LEVEL: DEBUG
+    AIRFLOW__CORE__DAG_DISCOVERY_SAFE_MODE: "false"
+    AIRFLOW__CORE__PARSER_WORKER_PROCESS_TIMEOUT: "60"
+
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/config:/opt/airflow/config
+    - ./airflow/plugins:/opt/airflow/plugins
+
+    - ./src:/opt/src
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on: &airflow-common-depends-on
+    airflow-postgres-db:
+      condition: service_healthy
+    redis:
+      condition: service_started
+    db_test:
+      condition: service_healthy
+    db_prod:
+      condition: service_healthy
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  airflow-postgres-db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow-postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  db_test:
+    image: postgres:18-alpine
+    container_name: etl-cicd-db-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-etl_test}
+      POSTGRES_USER: ${POSTGRES_TEST_USER:-etl_test}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
+      POSTGRES_HOST: ${POSTGRES_TEST_HOST:-db_test}
+      POSTGRES_PORT: ${POSTGRES_TEST_PORT:-5432}
+    volumes:
+      - postgres-db-test-volume:/var/lib/postgresql/data
+      - ./entrypoints/db/:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_TEST_USER:-etl_test} -d ${POSTGRES_TEST_DB:-etl_test}",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  db_prod:
+    image: postgres:18-alpine
+    container_name: etl-cicd-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_PROD_DB}
+      POSTGRES_USER: ${POSTGRES_PROD_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_PROD_HOST}
+      POSTGRES_PORT: ${POSTGRES_PROD_PORT}
+    volumes:
+      - postgres-db-prod-volume:/var/lib/postgresql/data
+      - ./entrypoints/db/:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_PROD_USER} -d ${POSTGRES_PROD_DB}",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    command: dag-processor
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        if [[ -z "$${AIRFLOW_UID}" ]]; then
+          echo
+          echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
+          echo "If you are on Linux, you SHOULD follow the instructions below to set "
+          echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
+          echo
+        fi
+        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/config /opt/airflow/plugins
+        chown -R "$${AIRFLOW_UID:-50000}:0" /opt/airflow/{logs,dags,config,plugins}
+        chmod -R +rwX /opt/airflow/{logs,dags,config,plugins}
+        /entrypoint airflow db migrate
+        /entrypoint airflow users create \
+          --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
+          --firstname Airflow \
+          --lastname Admin \
+          --role Admin \
+          --email airflow@example.com \
+          --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow} || true
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    user: "0:0"
+
+volumes:
+  airflow-postgres-db-volume:
+  postgres-db-test-volume:
+  postgres-db-prod-volume:

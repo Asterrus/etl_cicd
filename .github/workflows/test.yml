@@ -1,0 +1,30 @@
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install
+      - name: Run test database
+        run: make test-up
+      - name: Wait for postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 && break
+            sleep 1
+          done
+      - name: Run tests
+        run: make test
+      - name: Stop test database
+        if: always()
+        run: make test-down
