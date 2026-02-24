@@ -40,6 +40,7 @@ async def _run_etl_for_url(db_url: str) -> None:
 
     async with session_factory() as session:
         await run_etl(session)
+        await session.commit()
 
 
 def run_etl_test() -> None:
