@@ -1,10 +1,12 @@
-.PHONY: up down prod-up prod-down test-up test-down airflow-up airflow-down check-dags run-simple run-async run-etl
+-include .env
+export
 
-up:
-	docker compose up -d --build
+POSTGRES_TEST_USER ?= etl_test
+POSTGRES_TEST_DB   ?= etl_test
+POSTGRES_PROD_USER ?= etl_prod
+POSTGRES_PROD_DB   ?= etl_prod
 
-down:
-	docker compose down --volumes --remove-orphans
+.PHONY: prod-up prod-down test-up test-down test airflow-up airflow-down check-dags run-etl psql-test psql-prod
 
 prod-up:
 	docker compose up -d --build
@@ -32,11 +34,11 @@ check-dags:
 	docker compose -f docker-compose.airflow.yaml exec airflow-webserver airflow dags list-import-errors
 	docker compose -f docker-compose.airflow.yaml exec airflow-webserver python -c "import etl_dag"
 
-run-simple:
-	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test test_python_simple simple_task 2025-01-01
-
-run-async:
-	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test test_python_async async_task 2025-01-01
-
 run-etl:
 	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test etl_dwh_test run_etl_test 2025-01-01
+
+psql-test:
+	docker compose -f docker-compose.airflow.yaml exec -it db_test psql -U $(POSTGRES_TEST_USER) -d $(POSTGRES_TEST_DB)
+
+psql-prod:
+	docker compose -f docker-compose.airflow.yaml exec -it db_prod psql -U $(POSTGRES_PROD_USER) -d $(POSTGRES_PROD_DB)

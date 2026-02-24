@@ -12,7 +12,7 @@ async def create_temp_customers_table(session: AsyncSession):
           email,
           phone,
           md5(coalesce(name,'') || coalesce(email,'') || coalesce(phone,'')) AS attr_hash
-        FROM source.Customers 
+        FROM source.Customers
     """
     await session.execute(text(q))
 
