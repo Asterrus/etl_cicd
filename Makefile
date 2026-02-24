@@ -1,5 +1,10 @@
-include .env
+-include .env
 export
+
+POSTGRES_TEST_USER ?= etl_test
+POSTGRES_TEST_DB   ?= etl_test
+POSTGRES_PROD_USER ?= etl_prod
+POSTGRES_PROD_DB   ?= etl_prod
 
 .PHONY: prod-up prod-down test-up test-down test airflow-up airflow-down check-dags run-etl psql-test psql-prod
 

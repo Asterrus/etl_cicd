@@ -118,6 +118,29 @@ services:
       timeout: 3s
       retries: 5
 
+  db-seed:
+    image: postgres:18-alpine
+    restart: "no"
+    depends_on:
+      db_test:
+        condition: service_healthy
+      db_prod:
+        condition: service_healthy
+    volumes:
+      - ./entrypoints/seed/seed.sql:/seed.sql
+    environment:
+      POSTGRES_TEST_USER: ${POSTGRES_TEST_USER:-etl_test}
+      POSTGRES_TEST_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
+      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-etl_test}
+      POSTGRES_PROD_USER: ${POSTGRES_PROD_USER:-etl_prod}
+      POSTGRES_PROD_PASSWORD: ${POSTGRES_PROD_PASSWORD:-etl_prod_password}
+      POSTGRES_PROD_DB: ${POSTGRES_PROD_DB:-etl_prod}
+    command: >
+      sh -c "
+        PGPASSWORD=$$POSTGRES_TEST_PASSWORD psql -h db_test -U $$POSTGRES_TEST_USER -d $$POSTGRES_TEST_DB -f /seed.sql &&
+        PGPASSWORD=$$POSTGRES_PROD_PASSWORD psql -h db_prod -U $$POSTGRES_PROD_USER -d $$POSTGRES_PROD_DB -f /seed.sql
+      "
+
   airflow-webserver:
     <<: *airflow-common
     command: webserver
