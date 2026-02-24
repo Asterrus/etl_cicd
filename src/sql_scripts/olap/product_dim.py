@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def create_temp_products_table(session: AsyncSession):
+    await session.execute(text("DROP TABLE IF EXISTS products_with_hash"))
     q = """
-        DROP TABLE IF EXISTS products_with_hash;
         CREATE TEMP TABLE products_with_hash AS
         SELECT
           product_id,

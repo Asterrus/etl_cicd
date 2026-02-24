@@ -1,4 +1,4 @@
-FROM apache/airflow:3.1.7
+FROM apache/airflow:2.10.5
 
-RUN pip install "psycopg[binary,pool]" python-dotenv SQLAlchemy
+RUN pip install asyncpg python-dotenv "sqlalchemy>=1.4,<2.0"
 

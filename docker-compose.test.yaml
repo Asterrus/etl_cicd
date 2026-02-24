@@ -9,13 +9,13 @@ services:
       POSTGRES_DB: ${POSTGRES_TEST_DB:-etl_test}
       POSTGRES_USER: ${POSTGRES_TEST_USER:-etl_test}
       POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
-      POSTGRES_HOST: ${POSTGRES_TEST_HOST:-db_test}
-      POSTGRES_PORT: ${POSTGRES_TEST_PORT:-5435}
+      POSTGRES_HOST: ${POSTGRES_TEST_HOST:-localhost}
+      POSTGRES_PORT: ${POSTGRES_TEST_PORT:-5432}
     volumes:
       - postgres-db-test-volume:/var/lib/postgresql/data
       - ./entrypoints/db/:/docker-entrypoint-initdb.d
     ports:
-      - "${POSTGRES_TEST_PORT:-5435}:5432"
+      - "${POSTGRES_TEST_PORT:-5432}:5432"
     healthcheck:
       test:
         [

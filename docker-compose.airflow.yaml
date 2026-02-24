@@ -5,8 +5,10 @@ x-airflow-common: &airflow-common
     context: ./airflow/
     dockerfile: Dockerfile
   environment: &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres-db/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres-db/airflow
     AIRFLOW__CORE__FERNET_KEY: ""
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
@@ -17,8 +19,8 @@ x-airflow-common: &airflow-common
     POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-etl_test}
     POSTGRES_TEST_USER: ${POSTGRES_TEST_USER:-etl_test}
     POSTGRES_TEST_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
-    POSTGRES_TEST_HOST: ${POSTGRES_TEST_HOST:-db_test}
-    POSTGRES_TEST_PORT: ${POSTGRES_TEST_PORT:-5435}
+    POSTGRES_TEST_HOST: ${POSTGRES_TEST_HOST:-etl-cicd-db-test}
+    POSTGRES_TEST_PORT: ${POSTGRES_TEST_PORT:-5432}
 
     POSTGRES_PROD_DB: ${POSTGRES_PROD_DB:-etl_prod}
     POSTGRES_PROD_USER: ${POSTGRES_PROD_USER:-etl_prod}
@@ -43,8 +45,16 @@ x-airflow-common: &airflow-common
   depends_on: &airflow-common-depends-on
     airflow-postgres-db:
       condition: service_healthy
+    redis:
+      condition: service_started
+    db_test:
+      condition: service_healthy
 
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
   airflow-postgres-db:
     image: postgres:18-alpine
     restart: unless-stopped
@@ -60,9 +70,32 @@ services:
       retries: 5
       timeout: 5s
 
+  db_test:
+    image: postgres:18-alpine
+    container_name: etl-cicd-db-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-etl_test}
+      POSTGRES_USER: ${POSTGRES_TEST_USER:-etl_test}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-etl_test_password}
+      POSTGRES_HOST: ${POSTGRES_TEST_HOST:-db_test}
+      POSTGRES_PORT: ${POSTGRES_TEST_PORT:-5432}
+    volumes:
+      - postgres-db-test-volume:/var/lib/postgresql/data
+      - ./entrypoints/db/:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_TEST_USER:-etl_test} -d ${POSTGRES_TEST_DB:-etl_test}",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
   airflow-webserver:
     <<: *airflow-common
-    command: api-server
+    command: webserver
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -83,6 +116,15 @@ services:
   airflow-dag-processor:
     <<: *airflow-common
     command: dag-processor
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
     restart: unless-stopped
     depends_on:
       <<: *airflow-common-depends-on
@@ -121,3 +163,4 @@ services:
 
 volumes:
   airflow-postgres-db-volume:
+  postgres-db-test-volume:

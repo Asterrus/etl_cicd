@@ -1,4 +1,4 @@
-.PHONY: up down test-up test-down airflow-up airflow-down check-dags run-simple run-async
+.PHONY: up down test-up test-down airflow-up airflow-down check-dags run-simple run-async run-etl
 
 up:
 	docker compose up -d --build
@@ -31,3 +31,6 @@ run-simple:
 
 run-async:
 	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test test_python_async async_task 2025-01-01
+
+run-etl:
+	docker compose -f docker-compose.airflow.yaml exec airflow-scheduler airflow tasks test etl_dwh_test run_etl_test 2025-01-01
