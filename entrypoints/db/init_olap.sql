@@ -32,3 +32,11 @@ CREATE TABLE dwh.Sales_Fact(
     amount DECIMAL(10, 2) NOT NULL,
     quantity INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS dwh.data_quality_checks (
+    id SERIAL PRIMARY KEY,
+    check_name VARCHAR(100) NOT NULL,
+    status VARCHAR(10) NOT NULL,
+    value DECIMAL(10, 4),
+    checked_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

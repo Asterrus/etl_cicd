@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from airflow import DAG
 from db.engine import create_engine
+from sql_scripts.olap.data_quality import run_data_quality_checks
 from sql_scripts.olap.etl import run_etl
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,15 @@ async def _run_etl_for_url(db_url: str) -> None:
         await session.commit()
 
 
+async def _run_dq_checks_for_url(db_url: str) -> None:
+    engine = create_engine(db_url, is_echo=False)
+    session_factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with session_factory() as session:
+        await run_data_quality_checks(session)
+        await session.commit()
+
+
 def run_etl_test() -> None:
     db_url = _build_test_db_url()
     asyncio.run(_run_etl_for_url(db_url))
@@ -51,6 +61,16 @@ def run_etl_test() -> None:
 def run_etl_prod() -> None:
     db_url = _build_prod_db_url()
     asyncio.run(_run_etl_for_url(db_url))
+
+
+def run_dq_checks_test() -> None:
+    db_url = _build_test_db_url()
+    asyncio.run(_run_dq_checks_for_url(db_url))
+
+
+def run_dq_checks_prod() -> None:
+    db_url = _build_prod_db_url()
+    asyncio.run(_run_dq_checks_for_url(db_url))
 
 
 default_args = {
@@ -70,6 +90,11 @@ with DAG(
         task_id="run_etl_test",
         python_callable=run_etl_test,
     )
+    run_dq_checks_test_task = PythonOperator(
+        task_id="run_dq_checks_test",
+        python_callable=run_dq_checks_test,
+    )
+    run_etl_test_task >> run_dq_checks_test_task
 
 with DAG(
     dag_id="etl_dwh_prod",
@@ -82,3 +107,8 @@ with DAG(
         task_id="run_etl_prod",
         python_callable=run_etl_prod,
     )
+    run_dq_checks_prod_task = PythonOperator(
+        task_id="run_dq_checks_prod",
+        python_callable=run_dq_checks_prod,
+    )
+    run_etl_prod_task >> run_dq_checks_prod_task

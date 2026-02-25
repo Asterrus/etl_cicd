@@ -209,7 +209,28 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     user: "0:0"
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: etl-cicd-grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      db_prod:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      POSTGRES_PROD_USER: ${POSTGRES_PROD_USER:-etl_prod}
+      POSTGRES_PROD_PASSWORD: ${POSTGRES_PROD_PASSWORD:-etl_prod_password}
+      POSTGRES_PROD_DB: ${POSTGRES_PROD_DB:-etl_prod}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+
 volumes:
   airflow-postgres-db-volume:
   postgres-db-test-volume:
   postgres-db-prod-volume:
+  grafana-data:

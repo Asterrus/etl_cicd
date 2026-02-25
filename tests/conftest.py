@@ -20,7 +20,7 @@ def get_database_url() -> str:
     postgres_password = os.getenv("POSTGRES_TEST_PASSWORD", "etl_test_password")
     postgres_db = os.getenv("POSTGRES_TEST_DB", "etl_test")
     postgres_host = os.getenv("POSTGRES_LOCAL_TEST_HOST", "localhost")
-    postgres_port = os.getenv("POSTGRES_TEST_PORT", "5432")
+    postgres_port = os.getenv("POSTGRES_LOCAL_TEST_PORT", "5433")
     return f"postgresql+psycopg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
 
 

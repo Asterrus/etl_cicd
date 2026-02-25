@@ -1,0 +1,13 @@
+apiVersion: 1
+
+datasources:
+  - name: ETL PostgreSQL
+    type: grafana-postgresql-datasource
+    uid: etl_dq_postgres
+    url: db_prod:5432
+    database: ${POSTGRES_PROD_DB}
+    user: ${POSTGRES_PROD_USER}
+    secureJsonData:
+      password: ${POSTGRES_PROD_PASSWORD}
+    jsonData:
+      sslmode: disable
