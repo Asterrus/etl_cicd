@@ -209,6 +209,22 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     user: "0:0"
 
+  data-generator:
+    build:
+      context: ./data_generator
+    restart: unless-stopped
+    depends_on:
+      db_prod:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_PROD_USER:-etl_prod}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD:-etl_prod_password}
+      POSTGRES_DB: ${POSTGRES_PROD_DB:-etl_prod}
+      POSTGRES_HOST: db_prod
+      POSTGRES_PORT: "5432"
+      GENERATOR_BATCH_SIZE: ${GENERATOR_BATCH_SIZE:-5}
+      GENERATOR_INTERVAL_SEC: ${GENERATOR_INTERVAL_SEC:-30}
+
   grafana:
     image: grafana/grafana:latest
     container_name: etl-cicd-grafana

@@ -99,7 +99,7 @@ with DAG(
 with DAG(
     dag_id="etl_dwh_prod",
     default_args=default_args,
-    schedule=None,
+    schedule="* * * * *",
     catchup=False,
     tags=["etl", "dwh", "prod"],
 ) as dag_prod:

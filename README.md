@@ -1,18 +1,20 @@
 ## ETL Pipeline: Учётные системы → Хранилище данных
 
-ETL-пайплайн на Airflow: перенос данных из OLTP-источника в DWH с проверками качества данных.
+ETL-пайплайн на Airflow: перенос данных из OLTP-источника в DWH с проверками качества данных и мониторингом в Grafana.
 
 ### Архитектура
 
 ```mermaid
 flowchart LR
+    GEN[data-generator\nFaker + faker-commerce]
+
     subgraph source["OLTP (source)"]
         C[Customers]
         P[Products]
         S[Sales]
     end
 
-    subgraph airflow["Airflow (CeleryExecutor)"]
+    subgraph airflow["Airflow (CeleryExecutor) — каждую минуту"]
         ETL[run_etl]
         DQ[run_dq_checks]
         ETL --> DQ
@@ -25,12 +27,12 @@ flowchart LR
         DQT[data_quality_checks]
     end
 
+    GEN --> source
     source --> ETL
     ETL --> CD
     ETL --> PD
     ETL --> SF
     DQ --> DQT
-
     DQT --> Grafana
 ```
 
@@ -41,6 +43,7 @@ flowchart LR
 - Airflow 2.10.5 (CeleryExecutor + Redis)
 - Python 3.13, uv
 - Grafana (мониторинг качества данных)
+- Faker + faker-commerce (генерация тестовых данных)
 
 ### Быстрый старт
 
@@ -69,8 +72,7 @@ flowchart LR
    make airflow-up
    ```
 
-При первом запуске автоматически создаются схемы и загружаются тестовые данные:
-5 клиентов, 5 продуктов, 8 продаж.
+При первом запуске автоматически создаются схемы и загружаются начальные данные (5 клиентов, 5 продуктов, 8 продаж). После этого `data-generator` начинает непрерывно добавлять новые записи.
 
 ### Мониторинг
 
@@ -81,24 +83,37 @@ flowchart LR
 
 **Запуск DAG:**
 1. Открыть Airflow UI → DAGs
-2. Активировать и запустить:
-   - `etl_dwh_prod` — продуктовое окружение
-   - `etl_dwh_test` — тестовое окружение
+2. Активировать:
+   - `etl_dwh_prod` — запускается автоматически каждую минуту
+   - `etl_dwh_test` — запуск вручную
 
 Каждый DAG выполняет два шага: `run_etl → run_dq_checks`.
 
 **Grafana — дашборд ETL Data Quality:**
-- **Data Freshness** — график количества часов с момента последней загрузки (порог: 24 ч)
-- **Latest Check Status** — таблица последних результатов проверок (зелёный — OK, красный — FAIL)
+- **Data Freshness** — часов с момента последней загрузки (порог: 24 ч)
+- **Latest Check Status** — последние результаты проверок (OK / FAIL)
+- **Source Tables (OLTP)** — текущее количество строк в Customers, Products, Sales
+- **DWH Tables** — текущее количество строк в Customer_Dim, Product_Dim, Sales_Fact
+
+### Генератор данных
+
+Сервис `data-generator` автоматически наполняет `source`-таблицы случайными данными, чтобы дашборды Grafana показывали динамику.
+
+Настройка через `.env`:
+
+```env
+GENERATOR_BATCH_SIZE=5    # записей за одну итерацию
+GENERATOR_INTERVAL_SEC=30 # интервал между итерациями (секунды)
+```
 
 ### Схема данных
 
 ```
-source.Customers  ──┐
-source.Products   ──┼──► ETL ──► dwh.Customer_Dim (SCD2)
-source.Sales      ──┘            dwh.Product_Dim  (SCD2)
-                                 dwh.Sales_Fact
-                                 dwh.data_quality_checks
+data-generator ──► source.Customers  ──┐
+                   source.Products   ──┼──► ETL ──► dwh.Customer_Dim (SCD2)
+                   source.Sales      ──┘            dwh.Product_Dim  (SCD2)
+                                                    dwh.Sales_Fact
+                                                    dwh.data_quality_checks
 ```
 
 Подробное описание полей: [docs/data_dictionary.md](docs/data_dictionary.md)
@@ -124,13 +139,21 @@ make psql-prod   # подключиться к продуктовой БД
 
 ```
 airflow/
-  dags/etl_dag.py          # DAG: run_etl → run_dq_checks
+  dags/etl_dag.py          # DAG: run_etl → run_dq_checks (prod — каждую минуту)
   Dockerfile
+data_generator/
+  main.py                  # цикл генерации: generate → insert → sleep
+  db_connection.py
+  scripts/
+    data_generation.py     # Faker + faker-commerce
+    insert_data.py         # INSERT в source.*
+  Dockerfile
+  pyproject.toml / uv.lock
 docs/
   data_dictionary.md       # описание полей DWH-таблиц
 entrypoints/
   db/                      # SQL-скрипты создания схем
-  seed/seed.sql            # тестовые данные
+  seed/seed.sql            # начальные данные
 grafana/
   provisioning/            # автоматическая настройка datasource и дашборда
   dashboards/
